@@ -9,6 +9,22 @@ class TimeBasedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class RegionChoices(models.TextChoices):
+    andijon = 'Andijon', 'Andijon'
+    buxoro = 'Buxoro', 'Buxoro'
+    jizzax = 'Jizzax', 'Jizzax'
+    qashqadaryo = 'Qashqadaryo', 'Qashqadaryo'
+    navoiy = 'Navoiy', 'Navoiy'
+    namangan = 'Namangan', 'Namangan'
+    samarqand = 'Samarqand', 'Samarqand'
+    sirdaryo = 'Sirdaryo', 'Sirdaryo'
+    surxondaryo = 'Surxondaryo', 'Surxondaryo'
+    toshkent = 'Toshkent', 'Toshkent'
+    fargona = "Farg'ona", "Farg'ona"
+    xorazm = "Xorazm", "Xorazm"
+    qoraqalpoqiston = "Qoraqalpoqiston", "Qoraqalpoqiston"
+
+
 class User(TimeBasedModel):
     class Meta:
         verbose_name = "Пользователь Знакомств",
@@ -21,7 +37,6 @@ class User(TimeBasedModel):
     sex = models.CharField(max_length=30, verbose_name="Пол искателя", null=True)
     age = models.BigIntegerField(verbose_name="Возраст искателя", default=16)
     city = models.CharField(max_length=255, verbose_name="Город искателя", null=True)
-    need_city = models.CharField(max_length=255, verbose_name="Город партнера", null=True)
     longitude = models.FloatField(verbose_name="координаты пользователя", null=True)
     latitude = models.FloatField(verbose_name="координаты пользователя", null=True)
     verification = models.BooleanField(verbose_name="Верификация", default=False)
@@ -40,18 +55,3 @@ class User(TimeBasedModel):
 
     def __str__(self):
         return f"№{self.id} ({self.telegram_id}) - {self.name}"
-
-
-class UserMeetings(TimeBasedModel):
-    class Meta:
-        verbose_name = "Пользователь Мероприятий",
-        verbose_name_plural = "Пользователи Мероприятий"
-
-    id = models.AutoField(primary_key=True)
-    telegram_id = models.BigIntegerField(unique=True, default=1, verbose_name="ID пользователя Телеграм")
-    username = models.CharField(max_length=255, verbose_name="Username Telegram")
-    meetings_description = models.CharField(max_length=255, verbose_name="Описание встречи", null=True)
-    status = models.BooleanField(verbose_name="Статус мероприятия", default=False)
-
-    def __str__(self):
-        return f"№{self.id} ({self.telegram_id} - {self.username})"

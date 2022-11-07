@@ -100,7 +100,6 @@ async def get_name(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=RegData.age)
 async def get_age(message: types.Message, state: FSMContext):
-    markup = await location_keyboard()
     await state.update_data(age=message.text)
     try:
         censored = censored_message(message.text)
@@ -109,9 +108,7 @@ async def get_age(message: types.Message, state: FSMContext):
         logger.error(err)
         await message.answer("Вы ввели не число")
         return
-    await message.answer(text="Введите город в котором проживаете.\n"
-                              "Для точного определения местоположения, можете нажать на кнопку ниже!",
-                         reply_markup=markup)
+    await message.answer(text="Введите город в котором проживаете.\n")
     await RegData.town.set()
 
 
@@ -138,8 +135,8 @@ async def fill_form(message: types.Message):
         address = address.split(",")[0:2]
         address = ",".join(address)
         await db_commands.update_user_data(telegram_id=message.from_user.id, city=address)
-        await db_commands.update_user_data(telegram_id=message.from_user.id, longitude=x)
-        await db_commands.update_user_data(telegram_id=message.from_user.id, latitude=y)
+        # await db_commands.update_user_data(telegram_id=message.from_user.id, longitude=x)
+        # await db_commands.update_user_data(telegram_id=message.from_user.id, latitude=y)
         await message.answer('Ваш город сохранен!')
     except Exception as err:
         logger.error(err)
