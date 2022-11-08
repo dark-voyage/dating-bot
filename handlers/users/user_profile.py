@@ -12,17 +12,19 @@ async def my_profile_menu(call: CallbackQuery):
     telegram_id = call.from_user.id
     user_data = await get_data(telegram_id)
     await delete_message(call.message)
-    user_db = await db_commands.select_user(telegram_id=telegram_id)
-    markup = await get_profile_keyboard(verification=user_db["verification"])
-    await call.message.answer_photo(caption=f"<b>Ваша анкета:</b>\n\n"
-                                            f"{str(user_data[0])}, "
-                                            f"{str(user_data[1])} лет, "
-                                            f"{str(user_data[3])}\n\n"
-                                            f"<b>О себе</b> - {str(user_data[5])}\n\n"
-                                            f"<b>Инстаграм</b> - <code>{str(user_data[8])}</code>\n"
-                                            f"<b>Статус анкеты - {str(user_data[6])}</b>",
-                                    photo=user_data[7], reply_markup=markup)
-
+    # user_db = await db_commands.select_user(telegram_id=telegram_id)
+    markup = await get_profile_keyboard()
+    await call.message.answer_photo(photo=user_data['photo_id'])
+    await call.message.answer(text=f"<b>Sizni anketangiz:</b>\n\n"
+                                   f"{str(user_data['name'])}, {str(user_data['age'])},"
+                                   f"{str(user_data['region'])}({str(user_data['city'])}) "
+                                   f"\n\n"
+                                   f"Millat: {str(user_data['nation'])}\n"
+                                   f"Ma'lumot: {str(user_data['education'])}\n"
+                                   f"Ish: {str(user_data['job'])}\n"
+                                   f"Turmush holati: {str(user_data['lifestyle'])}\n"
+                                   f"<b>Qo'shimcha ma'lumot</b> - {str(user_data['commentary'])}\n\n",
+                              reply_markup=markup)
 
 @dp.callback_query_handler(text="disable")
 async def disable_profile(call: CallbackQuery):

@@ -26,12 +26,6 @@ def delete_user(telegram_id):
     return User.objects.filter(telegram_id=telegram_id).delete()
 
 
-
-
-
-
-
-
 @sync_to_async
 def select_all_users():
     users = User.objects.all().values()
@@ -54,11 +48,6 @@ def update_user_data(telegram_id, **kwargs):
     return User.objects.filter(telegram_id=telegram_id).update(**kwargs)
 
 
-
-
-
-
-
 @sync_to_async
 def select_user_username(username: str):
     user = User.objects.filter(username=username).values().first()
@@ -66,10 +55,19 @@ def select_user_username(username: str):
 
 
 @sync_to_async
-def search_users(need_partner_sex, need_age_min, need_age_max, user_need_city):
-    return User.objects.filter(
-        Q(sex=need_partner_sex) & Q(age__gte=need_age_min) & Q(age__lte=need_age_max)
-        & Q(city=user_need_city)).all().values()
+def search_users(need_partner_sex, need_age_min, need_age_max, need_region):
+    lst = User.objects.filter(
+        Q(sex=need_partner_sex) & Q(age__gte=need_age_min) & Q(age__lte=need_age_max) & Q(region=need_region)
+    ).all()
+    if lst.count() < 10:
+        lst = User.objects.filter(
+            Q(sex=need_partner_sex) & Q(age__gte=need_age_min) & Q(age__lte=need_age_max)
+        ).all()
+    if lst.count() < 100:
+        lst = User.objects.filter(
+            Q(sex=need_partner_sex) & Q(age__gte=need_age_min)
+        ).all()
+    return lst.values()
 
 
 @sync_to_async

@@ -7,9 +7,9 @@ from aiogram.types import CallbackQuery, ContentType
 from aiogram.utils.markdown import quote_html
 from loguru import logger
 
-from functions.auxiliary_tools import determining_location
 from handlers.users.back_handler import delete_message
 from keyboards.inline.change_data_profile_inline import change_info_keyboard, gender_keyboard
+from keyboards.inline.regions import region_keyboard
 from keyboards.inline.main_menu_inline import start_keyboard
 from loader import dp
 from states.new_data_state import NewData
@@ -82,13 +82,42 @@ async def change_city(call: CallbackQuery):
 
 
 @dp.message_handler(state=NewData.city)
-async def change_city(message: types.Message):
+async def change_city(message: types.Message, state: FSMContext):
+    markup = await change_info_keyboard()
     try:
-        await determining_location(message, flag=True)
+        censored = censored_message(message.text)
+        await db_commands.update_user_data(varname=quote_html(censored), telegram_id=message.from_user.id)
+        await message.answer(f'Ваше новое city: <b>{censored}</b>')
+        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await state.reset_state()
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка. Попробуйте ещё раз',
-                             reply_markup=await change_info_keyboard())
+        await message.answer(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await state.reset_state()
+
+
+@dp.callback_query_handler(text='region')
+async def change_region(call: CallbackQuery):
+    markup = await region_keyboard()
+    await call.message.edit_text(f'Выберите region: ', reply_markup=markup)
+    await NewData.region.set()
+
+
+@dp.callback_query_handler(state=NewData.region)
+async def change_region(call: CallbackQuery, state: FSMContext):
+    markup = await change_info_keyboard()
+    print(call, call.data)
+    try:
+        await db_commands.update_user_data(region=call.data, telegram_id=call.from_user.id)
+        await call.message.edit_text(f'Ваш новый пол: <b>{call.data}</b>')
+        await asyncio.sleep(1)
+        await call.message.edit_text(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await state.reset_state()
+    except Exception as err:
+        logger.error(err)
+        await call.message.edit_text(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await state.reset_state()
+    await state.reset_state()
 
 
 @dp.callback_query_handler(text="yes_all_good", state=NewData.city)
@@ -108,6 +137,7 @@ async def change_sex(call: CallbackQuery):
 @dp.callback_query_handler(state=NewData.sex)
 async def change_sex(call: CallbackQuery, state: FSMContext):
     markup = await change_info_keyboard()
+    print(call, call.data)
     if call.data == 'male':
         try:
             await db_commands.update_user_data(sex='Мужской', telegram_id=call.from_user.id)
@@ -206,36 +236,3 @@ async def update_comment_complete(message: types.Message, state: FSMContext):
                              f'Возможно, Ваше сообщение слишком большое\n'
                              f'Если ошибка осталась, напишите системному администратору.')
         await state.reset_state()
-
-
-@dp.callback_query_handler(text="add_inst")
-async def add_inst(call: CallbackQuery, state: FSMContext):
-    await delete_message(call.message)
-    await call.message.answer("Напишите имя своего аккаунта\n\n"
-                              "Примеры:\n"
-                              "<code>@unknown</code>\n"
-                              "<code>https://www.instagram.com/unknown</code>")
-    await state.set_state("inst")
-
-
-@dp.message_handler(state="inst")
-async def add_inst_state(message: types.Message, state: FSMContext):
-    try:
-        user_db = await db_commands.select_user(telegram_id=message.from_user.id)
-        markup = await start_keyboard(user_db["status"])
-        inst_regex = r"([A-Za-z0-9._](?:(?:[A-Za-z0-9._]|(?:\.(?!\.))){2,28}(?:[A-Za-z0-9._]))?)$"
-        regex = re.search(inst_regex, message.text)
-        result = regex
-        if bool(regex):
-            await state.update_data(inst=message.text)
-            await db_commands.update_user_data(instagram=result[0], telegram_id=message.from_user.id)
-            await message.answer(f"Ваш аккаунт успешно добавлен")
-            await state.reset_state()
-            await message.answer("Вы были возвращены в меню", reply_markup=markup)
-        else:
-            await message.answer("Вы ввели неправильную ссылку или имя аккаунта.\n\nПримеры:\n"
-                                 "<code>@unknown</code>\n<code>https://www.instagram.com/unknown</code>")
-
-    except Exception as err:
-        logger.error(err)
-        await message.answer("Возникла ошибка. Попробуйте еще раз")

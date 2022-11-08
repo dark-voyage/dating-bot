@@ -6,13 +6,15 @@ from aiogram.types import CallbackQuery, ContentType, ReplyKeyboardRemove, Inlin
 from aiogram.utils.markdown import quote_html
 from loguru import logger
 
-from functions.auxiliary_tools import choice_gender, determining_location
+from django_project.telegrambot.usersmanage.models import RegionChoices
+from functions.auxiliary_tools import choice_gender
 from keyboards.default.get_location_default import location_keyboard
 from keyboards.inline.change_data_profile_inline import gender_keyboard
 from keyboards.inline.main_menu_inline import start_keyboard
+from keyboards.inline.regions import region_keyboard, region_reply_keyboard
 from keyboards.inline.registration_inline import second_registration_keyboard
 
-from loader import dp, client
+from loader import dp
 from states.reg_state import RegData
 
 from utils.db_api import db_commands
@@ -24,14 +26,14 @@ from utils.misc.profanityFilter import censored_message
 async def registration(call: CallbackQuery):
     telegram_id = call.from_user.id
     user_data = await get_data(telegram_id)
-    user_status = user_data[9]
+    user_status = user_data['status']
     if not user_status:
         markup = await second_registration_keyboard()
-        text = f"Пройдите опрос, чтобы зарегистрироваться"
+        text = f"Registratsiya qilish uchun so'rovdan o'ting"
         await call.message.edit_text(text, reply_markup=markup)
     else:
         markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text="⬆️ Изменить анкету", callback_data="change_profile"))
+        markup.add(InlineKeyboardButton(text="⬆️ Anketani o'zgartirish", callback_data="change_profile"))
         await call.message.edit_text(
             "Вы уже зарегистрированы, если вам нужно изменить анкету, то нажмите на кнопку ниже",
             reply_markup=markup)
@@ -50,11 +52,14 @@ async def sex_reg(call: CallbackQuery):
     if call.data == 'male':
         try:
             await db_commands.update_user_data(telegram_id=call.from_user.id, sex="Мужской")
+            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Женский")
+
         except asyncpg.exceptions.UniqueViolationError as err:
             logger.error(err)
     elif call.data == 'female':
         try:
             await db_commands.update_user_data(telegram_id=call.from_user.id, sex='Женский')
+            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Мужской")
         except asyncpg.exceptions.UniqueViolationError as err:
             logger.error(err)
 
@@ -64,24 +69,13 @@ async def sex_reg(call: CallbackQuery):
 
 @dp.message_handler(state=RegData.commentary)
 async def commentary_reg(message: types.Message):
-    markup = await gender_keyboard()
     try:
         censored = censored_message(message.text)
         await db_commands.update_user_data(commentary=quote_html(censored), telegram_id=message.from_user.id)
-        await message.answer(f'Комментарий принят! Выберите, кого вы хотите найти: ', reply_markup=markup)
 
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка! Попробуйте изменить комментарий позже в разделе '
-                             f'"Меню"\n\n'
-                             f'Выберите, кого вы хотите найти: ', reply_markup=markup)
-    await RegData.need_partner_sex.set()
-
-
-@dp.callback_query_handler(state=RegData.need_partner_sex)
-async def sex_reg(call: CallbackQuery):
-    await choice_gender(call)
-    await call.message.edit_text(f'Отлично! Теперь напишите мне ваше имя, которое будут все видеть в анкете')
+    await message.answer("Ismingiz nima:")
     await RegData.name.set()
 
 
@@ -90,7 +84,7 @@ async def get_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     try:
         censored = censored_message(message.text)
-        await db_commands.update_user_data(telegram_id=message.from_user.id, varname=quote_html(censored))
+        await db_commands.update_user_data(telegram_id=message.from_user.id, name=quote_html(censored))
 
     except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
@@ -107,49 +101,80 @@ async def get_age(message: types.Message, state: FSMContext):
     except Exception as err:
         logger.error(err)
         await message.answer("Вы ввели не число")
-        return
-    await message.answer(text="Введите город в котором проживаете.\n")
+
+    markup = await region_reply_keyboard()
+    await message.reply(f'Выберите region: ', reply_markup=markup)
+    await RegData.region.set()
+
+
+@dp.message_handler(lambda message: (message.text, message.text) not in RegionChoices.choices, state=RegData.region)
+async def get_region(message: types.Message, state: FSMContext):
+    return await message.reply("Xato viloyat, itimos klaviaturadan viloyatni tanlang")
+
+
+@dp.message_handler(state=RegData.region)
+async def get_region(message: types.Message, state: FSMContext):
+    try:
+        await db_commands.update_user_data(region=message.text, telegram_id=message.from_user.id)
+        await message.reply(f'Ваш новый region: <b>{message.text}</b>')
+        await asyncio.sleep(1)
+    except Exception as err:
+        logger.error(err)
+    await message.reply("Sizni shahringiz:", reply_markup=ReplyKeyboardRemove())
     await RegData.town.set()
 
 
 @dp.message_handler(state=RegData.town)
-async def get_city(message: types.Message):
+async def get_city(message: types.Message, state: FSMContext):
+    await state.update_data(city=message.text)
     try:
-        await determining_location(message, flag=True)
-    except Exception as err:
+        censored = censored_message(message.text)
+        await db_commands.update_user_data(telegram_id=message.from_user.id, city=quote_html(censored))
+
+    except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
+    await message.answer("Ishingiz nima:")
+    await RegData.job.set()
 
 
-@dp.callback_query_handler(text="yes_all_good", state=RegData.town)
-async def get_hobbies(call: CallbackQuery):
-    await call.message.edit_text("Чем вы занимаетесь:")
-    await RegData.hobbies.set()
-
-
-@dp.message_handler(content_types=['location'], state=RegData.town)
-async def fill_form(message: types.Message):
+@dp.message_handler(state=RegData.job)
+async def get_job(message: types.Message, state: FSMContext):
     try:
-        x = message.location.longitude
-        y = message.location.latitude
-        address = client.address(f"{x}", f"{y}")
-        address = address.split(",")[0:2]
-        address = ",".join(address)
-        await db_commands.update_user_data(telegram_id=message.from_user.id, city=address)
-        # await db_commands.update_user_data(telegram_id=message.from_user.id, longitude=x)
-        # await db_commands.update_user_data(telegram_id=message.from_user.id, latitude=y)
-        await message.answer('Ваш город сохранен!')
-    except Exception as err:
+        await db_commands.update_user_data(telegram_id=message.from_user.id, job=quote_html(message.text))
+        await state.update_data(job=message.text)
+    except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
-    await asyncio.sleep(1)
-    await message.answer("Чем вы занимаетесь:")
-    await RegData.hobbies.set()
+    await message.answer("Ma'lumotingiz:")
+    await RegData.education.set()
 
 
-@dp.message_handler(state=RegData.hobbies)
-async def get_hobbies(message: types.Message, state: FSMContext):
+@dp.message_handler(state=RegData.education)
+async def get_education(message: types.Message, state: FSMContext):
+    try:
+        await db_commands.update_user_data(telegram_id=message.from_user.id, education=quote_html(message.text))
+        await state.update_data(education=message.text)
+    except asyncpg.exceptions.UniqueViolationError as err:
+        logger.error(err)
+    await message.answer("Millatingiz:")
+    await RegData.nation.set()
+
+
+@dp.message_handler(state=RegData.nation)
+async def get_nation(message: types.Message, state: FSMContext):
+    try:
+        await db_commands.update_user_data(telegram_id=message.from_user.id, nation=quote_html(message.text))
+        await state.update_data(nation=message.text)
+    except asyncpg.exceptions.UniqueViolationError as err:
+        logger.error(err)
+    await message.answer("Hozirdagi turmush holatiz:")
+    await RegData.lifestyle.set()
+
+
+@dp.message_handler(state=RegData.lifestyle)
+async def get_lifestyle(message: types.Message, state: FSMContext):
     try:
         await db_commands.update_user_data(telegram_id=message.from_user.id, lifestyle=quote_html(message.text))
-        await state.update_data(hobbies=message.text)
+        await state.update_data(lifestyle=message.text)
     except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
     await message.answer(f"И напоследок, Пришлите мне вашу фотографию")
@@ -175,10 +200,13 @@ async def get_photo(message: types.Message, state: FSMContext):
     user_data = await get_data(telegram_id)
     user_db = await db_commands.select_user(telegram_id=telegram_id)
     markup = await start_keyboard(status=user_db['status'])
-    await message.answer_photo(caption=f"Регистрация успешно завершена! \n\n "
-                                       f"{str(user_data[0])}, "
-                                       f"{str(user_data[1])} лет, "
-                                       f"{str(user_data[3])}\n\n"
-                                       f"<b>О себе</b> - {str(user_data[5])}",
-                               photo=user_db.get('photo_id'), reply_markup=ReplyKeyboardRemove())
+    await message.answer_photo(caption=f"<b>Sizni anketangiz:</b>\n\n"
+                                            f"{str(user_data['name'])}, {str(user_data['age'])}, {str(user_data['region'])}({str(user_data['city'])}) "
+                                            f"\n\n"
+                                            f"Millat: {str(user_data['nation'])}\n"
+                                            f"Ma'lumot: {str(user_data['education'])}\n"
+                                            f"Ish: {str(user_data['job'])}\n"
+                                            f"Turmush holati: {str(user_data['job'])}\n"
+                                            f"<b>Qo'shimcha ma'lumot</b> - {str(user_data['commentary'])}\n\n",
+                                    photo=user_data['photo_id'], reply_markup=ReplyKeyboardRemove())
     await message.answer("Меню: ", reply_markup=markup)

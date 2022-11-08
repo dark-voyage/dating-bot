@@ -10,11 +10,7 @@ from loader import dp
 from utils.db_api import db_commands
 
 
-@dp.callback_query_handler(text="verification")
-async def get_verification_status(call: CallbackQuery):
-    await delete_message(call.message)
-    await call.message.answer("Чтобы пройти верификацию вам нужно отправить свой контакт",
-                              reply_markup=await contact_keyboard())
+
 
 
 @dp.message_handler(content_types=types.ContentType.CONTACT)

@@ -32,7 +32,7 @@ async def monitoring_questionnaire(call: CallbackQuery) -> None:
         telegram_id = call.from_user.id
         user_data = await get_data(telegram_id)
         user_list = await get_next_user(telegram_id, monitoring=True)
-        user_status = user_data[9]
+        user_status = user_data["status"]
         if user_status:
             random_user = random.choice(user_list)
             await delete_message(call.message)

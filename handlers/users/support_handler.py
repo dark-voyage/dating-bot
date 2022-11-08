@@ -15,7 +15,7 @@ from functions.get_data_func import get_data
 async def ask_support_call(call: types.CallbackQuery):
     telegram_id = call.from_user.id
     user_data = await get_data(telegram_id)
-    user_status = user_data[9]
+    user_status = user_data["status"]
     if user_status:
         text = "Хотите связаться с тех поддержкой? Нажмите на кнопку ниже!"
         keyboard = await support_keyboard(messages="many")

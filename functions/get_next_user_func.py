@@ -7,7 +7,8 @@ from utils.db_api import db_commands
 async def get_next_user(telegram_id: int, monitoring=False) -> List[int]:
     user = await get_data_filters(telegram_id)
     if not monitoring:
-        user_filter = await db_commands.search_users(user[2], user[0], user[1], user[3])
+        user_filter = await db_commands.search_users(user[2], user[0],
+                                                     user[1], user[3])
     else:
         user_filter = await db_commands.select_all_users()
 

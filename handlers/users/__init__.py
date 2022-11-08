@@ -1,5 +1,4 @@
 from . import start_handler
-from . import verification_handler
 from . import registration_handler
 from . import change_datas
 from . import user_profile

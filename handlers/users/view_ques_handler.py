@@ -10,7 +10,7 @@ from loguru import logger
 
 from functions.create_forms_funcs import create_questionnaire, create_questionnaire_reciprocity, rand_user_list
 from functions.get_data_func import get_data
-from functions.get_next_user_func import get_next_user
+from functions.get_next_user_func import get_next_user #grupaga kirin hooy
 from handlers.users.back_handler import delete_message
 from keyboards.inline.main_menu_inline import start_keyboard
 from keyboards.inline.questionnaires_inline import action_keyboard, action_reciprocity_keyboard
@@ -25,7 +25,7 @@ async def start_finding(call: CallbackQuery, state: FSMContext):
         telegram_id = call.from_user.id
         user_data = await get_data(telegram_id)
         user_list = await get_next_user(telegram_id)
-        user_status = user_data[9]
+        user_status = user_data["status"]
         if user_status:
             random_user = random.choice(user_list)
             await create_questionnaire(form_owner=random_user, chat_id=telegram_id)
@@ -47,7 +47,7 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext, callback_da
         try:
             target_id = callback_data["target_id"]
             await create_questionnaire(form_owner=call.from_user.id, chat_id=target_id,
-                                       add_text=f'Вами заинтересовался пользователь '
+                                       add_text=f'Siz bilan bir odam qiziqib qoldi '
                                                 f'<a href="https://t.me/{username}">{username}</a>')
             await call.message.delete()
             await create_questionnaire(form_owner=(await rand_user_list(call))[3], chat_id=call.from_user.id)
@@ -116,5 +116,5 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext):
 @dp.message_handler(state='finding')
 async def echo_message_finding(message: types.Message, state: FSMContext):
     user_db = await db_commands.select_user(telegram_id=message.from_user.id)
-    await message.answer("Меню: ", reply_markup=await start_keyboard(user_db["status"]))
+    await message.answer("Меню: ", reply_markup=await start_keyboard(user_db["statu s"]))
     await state.reset_state()

@@ -7,7 +7,7 @@ import re
 
 from loguru import logger
 
-from functions.auxiliary_tools import choice_gender, determining_location
+from functions.auxiliary_tools import choice_gender
 from keyboards.inline.change_data_profile_inline import gender_keyboard
 from keyboards.inline.filters_inline import filters_keyboard
 
@@ -21,9 +21,7 @@ from functions.get_data_filters_func import get_data_filters
 async def get_filters(call: CallbackQuery):
     user_data = await get_data_filters(call.from_user.id)
     await call.message.edit_text("Фильтр по подбору партнеров:\n\n"
-                                 f"🚻 Необходимы пол партнера: {user_data[2]}\n"
-                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n"
-                                 f"🏙️ Город партнера: {user_data[3]}",
+                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n",
                                  reply_markup=await filters_keyboard())
 
 
@@ -62,9 +60,8 @@ async def desired_max_age_state(message: types.Message, state: FSMContext):
         await state.finish()
         user_data = await get_data_filters(message.from_user.id)
         await message.answer("Фильтр по подбору партнеров:\n\n"
-                             f"🚻 Необходимы пол партнера: {user_data[2]}\n"
-                             f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n"
-                             f"🏙️ Город партнера: {user_data[3]}",
+                             f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n",
+
                              reply_markup=await filters_keyboard())
 
     except Exception as err:
@@ -86,9 +83,8 @@ async def desired_gender(call: CallbackQuery, state: FSMContext):
     await asyncio.sleep(1)
     user_data = await get_data_filters(call.from_user.id)
     await call.message.edit_text("Фильтр по подбору партнеров:\n\n"
-                                 f"🚻 Необходимы пол партнера: {user_data[2]}\n"
-                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n"
-                                 f"🏙️ Город партнера: {user_data[3]}",
+                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n",
+
                                  reply_markup=await filters_keyboard())
     await state.finish()
 
@@ -99,15 +95,15 @@ async def user_city_filter(call: CallbackQuery, state: FSMContext):
     await state.set_state("city")
 
 
-@dp.message_handler(state="city")
-async def user_city_filter_state(message: types.Message):
-    try:
-        await determining_location(message, flag=False)
-
-    except Exception as err:
-        logger.info(err)
-        await message.answer("Произошла ошибка, попробуйте еще раз")
-        return
+# @dp.message_handler(state="city")
+# async def user_city_filter_state(message: types.Message):
+#     try:
+#         await determining_location(message, flag=False)
+#
+#     except Exception as err:
+#         logger.info(err)
+#         await message.answer("Произошла ошибка, попробуйте еще раз")
+#         return
 
 
 @dp.callback_query_handler(text="yes_all_good", state="city")
@@ -117,8 +113,7 @@ async def get_hobbies(call: CallbackQuery, state: FSMContext):
     await asyncio.sleep(2)
     user_data = await get_data_filters(call.from_user.id)
     await call.message.edit_text("Фильтр по подбору партнеров:\n\n"
-                                 f"🚻 Необходимы пол партнера: {user_data[2]}\n"
-                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n"
-                                 f"🏙️ Город партнера: {user_data[3]}",
+                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n",
+
                                  reply_markup=await filters_keyboard())
     await state.finish()
