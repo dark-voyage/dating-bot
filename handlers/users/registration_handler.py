@@ -43,7 +43,7 @@ async def registration(call: CallbackQuery):
 async def survey(call: CallbackQuery):
     markup = await gender_keyboard()
 
-    await call.message.edit_text("Выберите пол", reply_markup=markup)
+    await call.message.edit_text("Jinsni tanglang", reply_markup=markup)
     await RegData.sex.set()
 
 
@@ -51,19 +51,19 @@ async def survey(call: CallbackQuery):
 async def sex_reg(call: CallbackQuery):
     if call.data == 'male':
         try:
-            await db_commands.update_user_data(telegram_id=call.from_user.id, sex="Мужской")
-            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Женский")
+            await db_commands.update_user_data(telegram_id=call.from_user.id, sex="Erkak")
+            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Ayol")
 
         except asyncpg.exceptions.UniqueViolationError as err:
             logger.error(err)
     elif call.data == 'female':
         try:
-            await db_commands.update_user_data(telegram_id=call.from_user.id, sex='Женский')
-            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Мужской")
+            await db_commands.update_user_data(telegram_id=call.from_user.id, sex='Ayol')
+            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex="Erkak")
         except asyncpg.exceptions.UniqueViolationError as err:
             logger.error(err)
 
-    await call.message.edit_text(f'Теперь напишите немного о себе: \n\n(255 символов max.)')
+    await call.message.edit_text(f"Endi o'zingiz haqingizda yozing: \n\n(255 belgilar max.)")
     await RegData.commentary.set()
 
 
@@ -88,7 +88,7 @@ async def get_name(message: types.Message, state: FSMContext):
 
     except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
-    await message.answer("Введите сколько вам лет:")
+    await message.answer("Yoshingiz nechada: ")
     await RegData.age.set()
 
 
@@ -100,10 +100,10 @@ async def get_age(message: types.Message, state: FSMContext):
         await db_commands.update_user_data(telegram_id=message.from_user.id, age=quote_html(censored))
     except Exception as err:
         logger.error(err)
-        await message.answer("Вы ввели не число")
+        await message.answer("Bu son emas")
 
     markup = await region_reply_keyboard()
-    await message.reply(f'Выберите region: ', reply_markup=markup)
+    await message.reply(f'Viloyatingizni tanlang: ', reply_markup=markup)
     await RegData.region.set()
 
 
@@ -116,7 +116,7 @@ async def get_region(message: types.Message, state: FSMContext):
 async def get_region(message: types.Message, state: FSMContext):
     try:
         await db_commands.update_user_data(region=message.text, telegram_id=message.from_user.id)
-        await message.reply(f'Ваш новый region: <b>{message.text}</b>')
+        await message.reply(f'Sizni yangi viloyatingiz: <b>{message.text}</b>')
         await asyncio.sleep(1)
     except Exception as err:
         logger.error(err)
@@ -177,7 +177,7 @@ async def get_lifestyle(message: types.Message, state: FSMContext):
         await state.update_data(lifestyle=message.text)
     except asyncpg.exceptions.UniqueViolationError as err:
         logger.error(err)
-    await message.answer(f"И напоследок, Пришлите мне вашу фотографию")
+    await message.answer(f"Foto yuboring(O'zingizniki bo'lsa yaxshiroq)")
     await RegData.photo.set()
 
 
@@ -206,7 +206,7 @@ async def get_photo(message: types.Message, state: FSMContext):
                                             f"Millat: {str(user_data['nation'])}\n"
                                             f"Ma'lumot: {str(user_data['education'])}\n"
                                             f"Ish: {str(user_data['job'])}\n"
-                                            f"Turmush holati: {str(user_data['job'])}\n"
+                                            f"Turmush holati: {str(user_data['lifestyle'])}\n"
                                             f"<b>Qo'shimcha ma'lumot</b> - {str(user_data['commentary'])}\n\n",
                                     photo=user_data['photo_id'], reply_markup=ReplyKeyboardRemove())
-    await message.answer("Меню: ", reply_markup=markup)
+    await message.answer("Menu: ", reply_markup=markup)

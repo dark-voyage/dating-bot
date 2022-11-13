@@ -43,7 +43,7 @@ class User(TimeBasedModel):
     nation = models.CharField(max_length=30, verbose_name="Millati")
     education = models.CharField(max_length=30, verbose_name="Ma'lumoti")
     job = models.CharField(max_length=50, verbose_name="Kasbi")
-    lifestyle = models.CharField(max_length=100, verbose_name="Стиль жизни пользователя", null=True)
+    lifestyle = models.CharField(max_length=100, verbose_name="Turmush holati", null=True)
     is_banned = models.BooleanField(verbose_name="Забанен ли пользователь", default=False)
     photo_id = models.CharField(max_length=400, verbose_name="Photo_ID", null=True)
     commentary = models.CharField(max_length=300, verbose_name="Комментарий пользователя", null=True)

@@ -6,11 +6,11 @@ from data.config import load_config
 
 
 async def on_startup_notify(dp: Dispatcher):
-    logger.info("Оповещение администрации...")
+    logger.info("Administratsiya ogohlantiruvi...")
     for admin in load_config().tg_bot.admin_ids:
         try:
             await dp.bot.send_message(
-                admin, "Бот был успешно запущен", disable_notification=True
+                admin, "Bot ishga tushirildi", disable_notification=True
             )
         except ChatNotFound:
-            logger.debug("Чат с админом не найден")
+            logger.debug("Admin bilan chat topilmadi")

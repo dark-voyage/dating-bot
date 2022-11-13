@@ -21,7 +21,7 @@ from utils.misc.profanityFilter import censored_message
 async def start_change_data(call: CallbackQuery):
     markup = await change_info_keyboard()
     await delete_message(call.message)
-    await call.message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+    await call.message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
 
 
 @dp.callback_query_handler(text='name')
@@ -35,13 +35,13 @@ async def change_name(message: types.Message, state: FSMContext):
     markup = await change_info_keyboard()
     try:
         censored = censored_message(message.text)
-        await db_commands.update_user_data(varname=quote_html(censored), telegram_id=message.from_user.id)
-        await message.answer(f'Ваше новое имя: <b>{censored}</b>')
-        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await db_commands.update_user_data(name=quote_html(censored), telegram_id=message.from_user.id)
+        await message.answer(f'Sizni yangi ismingiz: <b>{censored}</b>')
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await message.answer(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
         await state.reset_state()
 
     await state.reset_state()
@@ -49,7 +49,7 @@ async def change_name(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='age')
 async def change_age(call: CallbackQuery):
-    await call.message.edit_text(f'Введите новый возраст')
+    await call.message.edit_text(f'Yangi yoshni yozing')
     await NewData.age.set()
 
 
@@ -59,17 +59,17 @@ async def change_age(message: types.Message, state: FSMContext):
     try:
         if int(message.text) and 0 < int(message.text) < 110:
             await db_commands.update_user_data(age=message.text, telegram_id=message.from_user.id)
-            await message.answer(f'Ваш новый возраст: <b>{message.text}</b>')
+            await message.answer(f'Sizni yangi yoshingiz: <b>{message.text}</b>')
             await asyncio.sleep(3)
-            await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+            await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
             await state.reset_state()
         else:
-            await message.answer(f'Неправильные данные!. Попробуйте ещё раз', reply_markup=markup)
+            await message.answer(f"Noto'g'ri ma'lumotlar. Qayta urinib ko'ring", reply_markup=markup)
             await state.reset_state()
 
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await message.answer(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
         await state.reset_state()
 
     await state.reset_state()
@@ -87,19 +87,19 @@ async def change_city(message: types.Message, state: FSMContext):
     try:
         censored = censored_message(message.text)
         await db_commands.update_user_data(varname=quote_html(censored), telegram_id=message.from_user.id)
-        await message.answer(f'Ваше новое city: <b>{censored}</b>')
-        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await message.answer(f'Sizni yangi shahringiz: <b>{censored}</b>')
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await message.answer(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
         await state.reset_state()
 
 
 @dp.callback_query_handler(text='region')
 async def change_region(call: CallbackQuery):
     markup = await region_keyboard()
-    await call.message.edit_text(f'Выберите region: ', reply_markup=markup)
+    await call.message.edit_text(f'Viloyatingizni tanlang: ', reply_markup=markup)
     await NewData.region.set()
 
 
@@ -109,20 +109,20 @@ async def change_region(call: CallbackQuery, state: FSMContext):
     print(call, call.data)
     try:
         await db_commands.update_user_data(region=call.data, telegram_id=call.from_user.id)
-        await call.message.edit_text(f'Ваш новый пол: <b>{call.data}</b>')
+        await call.message.edit_text(f'Sizni yangi jinsingiz: <b>{call.data}</b>')
         await asyncio.sleep(1)
-        await call.message.edit_text(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await call.message.edit_text(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)
-        await call.message.edit_text(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+        await call.message.edit_text(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
         await state.reset_state()
     await state.reset_state()
 
 
 @dp.callback_query_handler(text="yes_all_good", state=NewData.city)
 async def get_hobbies(call: CallbackQuery, state: FSMContext):
-    await call.message.edit_text(f'Данные успешно изменены.\nВыберите, что вы хотите изменить: ',
+    await call.message.edit_text(f"Ma'lumotlar o'zgartirildi.\nNimani o'zgartirmoqchi bo'lganizni tanlang: ",
                                  reply_markup=await change_info_keyboard())
     await state.reset_state()
 
@@ -130,7 +130,7 @@ async def get_hobbies(call: CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text='gender')
 async def change_sex(call: CallbackQuery):
     markup = await gender_keyboard()
-    await call.message.edit_text(f'Выберите новый пол: ', reply_markup=markup)
+    await call.message.edit_text(f'Yangi jinsni tanlang: ', reply_markup=markup)
     await NewData.sex.set()
 
 
@@ -140,56 +140,124 @@ async def change_sex(call: CallbackQuery, state: FSMContext):
     print(call, call.data)
     if call.data == 'male':
         try:
-            await db_commands.update_user_data(sex='Мужской', telegram_id=call.from_user.id)
-            await call.message.edit_text(f'Ваш новый пол: <b>Мужской</b>')
+            await db_commands.update_user_data(sex='Erkak', telegram_id=call.from_user.id)
+            await call.message.edit_text(f'Sizni yangi jinsingiz: <b>Erkak</b>')
             await asyncio.sleep(3)
-            await call.message.edit_text(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+            await call.message.edit_text(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
             await state.reset_state()
         except Exception as err:
             logger.error(err)
-            await call.message.edit_text(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+            await call.message.edit_text(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
             await state.reset_state()
     if call.data == 'female':
         try:
-            await db_commands.update_user_data(sex='Женский', telegram_id=call.from_user.id)
-            await call.message.edit_text(f'Ваш новый пол: <b>Женский</b>')
+            await db_commands.update_user_data(sex='Ayol', telegram_id=call.from_user.id)
+            await call.message.edit_text(f'Sizni yangi jinsingiz: <b>Ayol</b>')
             await asyncio.sleep(3)
-            await call.message.edit_text(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+            await call.message.edit_text(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
             await state.reset_state()
         except Exception as err:
             logger.error(err)
-            await call.message.edit_text(f'Произошла неизвестная ошибка. Попробуйте ещё раз', reply_markup=markup)
+            await call.message.edit_text(f"Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring", reply_markup=markup)
             await state.reset_state()
 
     await state.reset_state()
 
 
-@dp.callback_query_handler(text='busyness')
+@dp.callback_query_handler(text='job')
+async def change_job(call: CallbackQuery):
+    await call.message.edit_text(f"Kasbingiz nima?")
+    await NewData.job.set()
+
+
+@dp.message_handler(state=NewData.job)
+async def change_job(message: types.Message, state: FSMContext):
+    markup = await change_info_keyboard()
+    try:
+        censored = censored_message(message.text)
+        await db_commands.update_user_data(job=quote_html(censored), telegram_id=message.from_user.id)
+        await message.answer(f"Ma'lumotlar o'zgaritirildi!")
+        await asyncio.sleep(2)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
+        await state.reset_state()
+    except Exception as err:
+        logger.error(err)
+        await message.answer(f'Noaniq xatolik yuz berdi', reply_markup=markup)
+        await state.reset_state()
+    await state.reset_state()
+
+
+@dp.callback_query_handler(text='lifestyle')
 async def change_style(call: CallbackQuery):
-    await call.message.edit_text(f'Чем вы занимаетесь?')
-    await NewData.hobbies.set()
+    await call.message.edit_text(f'Turmush holatingiz qanday?')
+    await NewData.lifestyle.set()
 
 
-@dp.message_handler(state=NewData.hobbies)
+@dp.message_handler(state=NewData.lifestyle)
 async def change_style(message: types.Message, state: FSMContext):
     markup = await change_info_keyboard()
     try:
         censored = censored_message(message.text)
         await db_commands.update_user_data(lifestyle=quote_html(censored), telegram_id=message.from_user.id)
-        await message.answer(f'Данные были изменены!')
+        await message.answer(f"Ma'lumotlar o'zgaritirildi!")
         await asyncio.sleep(2)
-        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)
-        await message.answer(f'Произошла неизвестная ошибка', reply_markup=markup)
+        await message.answer(f'Noaniq xatolik yuz berdi', reply_markup=markup)
         await state.reset_state()
     await state.reset_state()
 
 
+@dp.callback_query_handler(text='education')
+async def change_education(call: CallbackQuery):
+    await call.message.edit_text(f"Ma'lumotingiz qanday?")
+    await NewData.education.set()
+
+
+@dp.message_handler(state=NewData.education)
+async def change_education(message: types.Message, state: FSMContext):
+    markup = await change_info_keyboard()
+    try:
+        censored = censored_message(message.text)
+        await db_commands.update_user_data(education=quote_html(censored), telegram_id=message.from_user.id)
+        await message.answer(f"Ma'lumotlar o'zgaritirildi!")
+        await asyncio.sleep(2)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
+        await state.reset_state()
+    except Exception as err:
+        logger.error(err)
+        await message.answer(f'Noaniq xatolik yuz berdi', reply_markup=markup)
+        await state.reset_state()
+    await state.reset_state()
+
+
+@dp.callback_query_handler(text='nation')
+async def change_nation(call: CallbackQuery):
+    await call.message.edit_text(f"Qaysi millatdansiz?")
+    await NewData.nation.set()
+
+
+@dp.message_handler(state=NewData.nation)
+async def change_nation(message: types.Message, state: FSMContext):
+    markup = await change_info_keyboard()
+    try:
+        censored = censored_message(message.text)
+        await db_commands.update_user_data(nation=quote_html(censored), telegram_id=message.from_user.id)
+        await message.answer(f"Ma'lumotlar o'zgaritirildi!")
+        await asyncio.sleep(2)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
+        await state.reset_state()
+    except Exception as err:
+        logger.error(err)
+        await message.answer(f'Noaniq xatolik yuz berdi', reply_markup=markup)
+        await state.reset_state()
+    await state.reset_state()
+
 @dp.callback_query_handler(text='photo')
 async def new_photo(call: CallbackQuery):
-    await call.message.edit_text(f'Отправьте мне новую фотографию')
+    await call.message.edit_text(f'Yangi fotoni yuboring')
     await NewData.photo.set()
     await asyncio.sleep(3)
     await delete_message(call.message)
@@ -201,10 +269,10 @@ async def update_photo_complete(message: types.Message, state: FSMContext):
     file_id = message.photo[-1].file_id
     try:
         await db_commands.update_user_data(photo_id=file_id, telegram_id=message.from_user.id)
-        await message.answer(f'Фото принято!')
+        await message.answer(f'Foto qabul qilindi!')
         await asyncio.sleep(3)
         await delete_message(message)
-        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)
@@ -215,7 +283,7 @@ async def update_photo_complete(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='about_me')
 async def new_comment(call: CallbackQuery):
-    await call.message.edit_text(f'Отправьте мне новое описание анкеты: ')
+    await call.message.edit_text(f'Anketangizni yangi tavsifini yuboring(maksimal 255 ta simvol) : ')
     await NewData.commentary.set()
 
 
@@ -225,10 +293,10 @@ async def update_comment_complete(message: types.Message, state: FSMContext):
     try:
         censored = censored_message(message.text)
         await db_commands.update_user_data(commentary=quote_html(censored), telegram_id=message.from_user.id)
-        await message.answer(f'Комментарий принят!')
+        await message.answer(f'Kommentariy qabul qilindi!')
         await asyncio.sleep(3)
         await delete_message(message)
-        await message.answer(f'Выберите, что вы хотите изменить: ', reply_markup=markup)
+        await message.answer(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()
     except Exception as err:
         logger.error(err)

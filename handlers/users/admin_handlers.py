@@ -39,7 +39,7 @@ async def ban_form_owner(call: types.CallbackQuery):
     target_id = call.data.split(":")[2]
     await db_commands.update_user_data(telegram_id=target_id, is_banned=True)
     await db_commands.delete_user(telegram_id=target_id)
-    await call.answer("Анкета пользователя была заблокирована")
+    await call.answer("Foydalunvchining anketasi bloklandi")
     await monitoring_questionnaire(call)
 
 

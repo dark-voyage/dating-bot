@@ -14,8 +14,7 @@ async def my_profile_menu(call: CallbackQuery):
     await delete_message(call.message)
     # user_db = await db_commands.select_user(telegram_id=telegram_id)
     markup = await get_profile_keyboard()
-    await call.message.answer_photo(photo=user_data['photo_id'])
-    await call.message.answer(text=f"<b>Sizni anketangiz:</b>\n\n"
+    await call.message.answer_photo(photo=user_data['photo_id'], caption=f"<b>Sizni anketangiz:</b>\n\n"
                                    f"{str(user_data['name'])}, {str(user_data['age'])},"
                                    f"{str(user_data['region'])}({str(user_data['city'])}) "
                                    f"\n\n"
@@ -30,4 +29,4 @@ async def my_profile_menu(call: CallbackQuery):
 async def disable_profile(call: CallbackQuery):
     await db_commands.delete_user(telegram_id=call.from_user.id)
     await delete_message(call.message)
-    await call.message.answer("Ваша анкета удалена!\nЯ надеюсь вы кого-нибудь нашли")
+    await call.message.answer("Sizni anketangiz o'chirildi!\nUmid qilamanki siz o'zingizga kimnidir topdingiz")

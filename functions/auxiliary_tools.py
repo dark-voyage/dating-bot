@@ -15,7 +15,7 @@ async def choice_gender(call: CallbackQuery) -> None:
             logger.error(err)
     elif call.data == 'female':
         try:
-            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex='Женский')
+            await db_commands.update_user_data(telegram_id=call.from_user.id, need_partner_sex='Ayol')
         except asyncpg.exceptions.UniqueViolationError as err:
             logger.error(err)
 

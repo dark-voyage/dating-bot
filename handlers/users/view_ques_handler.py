@@ -81,7 +81,7 @@ async def like_questionnaire_reciprocity(call: CallbackQuery, state: FSMContext,
         user_db = await db_commands.select_user(telegram_id=call.from_user.id)
         await asyncio.sleep(1)
 
-        await call.message.answer("Ваша анкета отправлена другому пользователю",
+        await call.message.answer("Sizni anketangiz boshqa odamga yuborildi",
                                   reply_markup=await start_keyboard(user_db["status"]))
         await asyncio.sleep(5)
         await create_questionnaire_reciprocity(liker=call.from_user.id, chat_id=user_for_like,
@@ -95,7 +95,7 @@ async def like_questionnaire_reciprocity(call: CallbackQuery, state: FSMContext,
         await delete_message(call.message)
         await state.reset_state()
         user_db = await db_commands.select_user(telegram_id=call.from_user.id)
-        await call.message.answer("Меню: ", reply_markup=await start_keyboard(user_db["status"]))
+        await call.message.answer("Menu: ", reply_markup=await start_keyboard(user_db["status"]))
     await state.reset_state()
 
 
@@ -109,12 +109,12 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext):
 
         await state.reset_data()
     except IndexError:
-        await call.answer("На данный момент у нас нет подходящих анкет для вас")
+        await call.answer("Hozirchalik sizga mos odam yo'q")
         await state.reset_data()
 
 
 @dp.message_handler(state='finding')
 async def echo_message_finding(message: types.Message, state: FSMContext):
     user_db = await db_commands.select_user(telegram_id=message.from_user.id)
-    await message.answer("Меню: ", reply_markup=await start_keyboard(user_db["statu s"]))
+    await message.answer("Menu: ", reply_markup=await start_keyboard(user_db["statu s"]))
     await state.reset_state()

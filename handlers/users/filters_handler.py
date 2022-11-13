@@ -20,14 +20,14 @@ from functions.get_data_filters_func import get_data_filters
 @dp.callback_query_handler(text="filters")
 async def get_filters(call: CallbackQuery):
     user_data = await get_data_filters(call.from_user.id)
-    await call.message.edit_text("Фильтр по подбору партнеров:\n\n"
-                                 f"🔞 Возрастной диапазон: {user_data[0]}-{user_data[1]} лет\n\n",
+    await call.message.edit_text("Yor izlash bo'yicha filtrlar:\n\n"
+                                 f"🔞 Yosh diapazoni: {user_data[0]}-{user_data[1]} yosh\n\n",
                                  reply_markup=await filters_keyboard())
 
 
 @dp.callback_query_handler(text="user_age_period")
 async def desired_age(call: CallbackQuery, state: FSMContext):
-    await call.message.edit_text("Напишите минимальный возраст")
+    await call.message.edit_text("Minimal yoshni yozing")
     await state.set_state("age_period")
 
 
@@ -45,7 +45,7 @@ async def desired_min_age_state(message: types.Message, state: FSMContext):
 
     except Exception as err:
         logger.error(err)
-        await message.answer("Произошла неизвестная ошибка! Попробуйте еще раз")
+        await message.answer("Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring")
 
 
 @dp.message_handler(state="max_age_period")
@@ -66,7 +66,7 @@ async def desired_max_age_state(message: types.Message, state: FSMContext):
 
     except Exception as err:
         logger.error(err)
-        await message.answer("Произошла неизвестная ошибка! Попробуйте еще раз")
+        await message.answer("Noaniq xatolik yuz berdi! Iltimos qayta urinib ko'ring")
 
 
 @dp.callback_query_handler(text="user_need_gender")
