@@ -59,14 +59,18 @@ def search_users(need_partner_sex, need_age_min, need_age_max, need_region):
     lst = User.objects.filter(
         Q(sex=need_partner_sex) & Q(age__gte=need_age_min) & Q(age__lte=need_age_max) & Q(region=need_region)
     ).all()
+
+
     if lst.count() < 10:
         lst = User.objects.filter(
             Q(sex=need_partner_sex) & Q(age__gte=need_age_min) & Q(age__lte=need_age_max)
         ).all()
+
     if lst.count() < 100:
         lst = User.objects.filter(
             Q(sex=need_partner_sex) & Q(age__gte=need_age_min)
         ).all()
+
     return lst.values()
 
 

@@ -31,10 +31,10 @@ async def start_finding(call: CallbackQuery, state: FSMContext):
             await create_questionnaire(form_owner=random_user, chat_id=telegram_id)
             await state.set_state('finding')
         else:
-            await call.message.edit_text("Вам необходимо зарегистрироваться, нажмите на кнопку ниже",
+            await call.message.edit_text("Siz registratsiyadan o'tishiz kerak",
                                          reply_markup=await registration_keyboard())
     except IndexError:
-        await call.answer("На данный момент у нас нет подходящих анкет для вас")
+        await call.answer("Hozirchalik sizga mos odam yo'q")
 
 
 @dp.callback_query_handler(action_keyboard.filter(action=["like", "dislike", "stopped"]),
@@ -67,8 +67,7 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext, callback_da
     elif action == "stopped":
         markup = await start_keyboard(user_db["status"])
         await call.message.delete()
-        await call.message.answer(f"Рад был помочь, {call.from_user.full_name}!\n"
-                                  f"Надеюсь, ты нашел кого-то благодаря мне", reply_markup=markup)
+        await call.message.answer(f"Sizni yana kutamiz", reply_markup=markup)
         await state.reset_state()
 
 
@@ -76,6 +75,7 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext, callback_da
 async def like_questionnaire_reciprocity(call: CallbackQuery, state: FSMContext, callback_data: typing.Dict[str, str]):
     action = callback_data['action']
     username = call.from_user.username
+
     if action == "like_reciprocity":
         user_for_like = callback_data["user_for_like"]
         user_db = await db_commands.select_user(telegram_id=call.from_user.id)
@@ -85,7 +85,7 @@ async def like_questionnaire_reciprocity(call: CallbackQuery, state: FSMContext,
                                   reply_markup=await start_keyboard(user_db["status"]))
         await asyncio.sleep(5)
         await create_questionnaire_reciprocity(liker=call.from_user.id, chat_id=user_for_like,
-                                               add_text=f'Вам ответили взаимностью, пользователь - '
+                                               add_text=f'Siz bir odamga yoqdiz - '
                                                         f'<a href="https://t.me/{username}">{username}</a>',
                                                user_db=user_db)
         await state.reset_state()
@@ -116,5 +116,5 @@ async def like_questionnaire(call: CallbackQuery, state: FSMContext):
 @dp.message_handler(state='finding')
 async def echo_message_finding(message: types.Message, state: FSMContext):
     user_db = await db_commands.select_user(telegram_id=message.from_user.id)
-    await message.answer("Menu: ", reply_markup=await start_keyboard(user_db["statu s"]))
+    await message.answer("Menu: ", reply_markup=await start_keyboard(user_db["status"]))
     await state.reset_state()

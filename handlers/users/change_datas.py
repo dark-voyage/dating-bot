@@ -109,7 +109,7 @@ async def change_region(call: CallbackQuery, state: FSMContext):
     print(call, call.data)
     try:
         await db_commands.update_user_data(region=call.data, telegram_id=call.from_user.id)
-        await call.message.edit_text(f'Sizni yangi jinsingiz: <b>{call.data}</b>')
+        await call.message.edit_text(f'Sizni yangi viloyatingiz: <b>{call.data}</b>')
         await asyncio.sleep(1)
         await call.message.edit_text(f"Nimani o'zgartirmoqchi bo'lganizni tanlang: ", reply_markup=markup)
         await state.reset_state()

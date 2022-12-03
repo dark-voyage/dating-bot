@@ -95,17 +95,16 @@ async def get_name(message: types.Message, state: FSMContext):
 @dp.message_handler(state=RegData.age)
 async def get_age(message: types.Message, state: FSMContext):
     await state.update_data(age=message.text)
-    try:
-        censored = censored_message(message.text)
+    censored = censored_message(message.text)
+    if censored.isnumeric():
         await db_commands.update_user_data(telegram_id=message.from_user.id, age=quote_html(censored))
-    except Exception as err:
-        logger.error(err)
+
+
+        markup = await region_reply_keyboard()
+        await message.reply(f'Viloyatingizni tanlang: ', reply_markup=markup)
+        await RegData.region.set()
+    else:
         await message.answer("Bu son emas")
-
-    markup = await region_reply_keyboard()
-    await message.reply(f'Viloyatingizni tanlang: ', reply_markup=markup)
-    await RegData.region.set()
-
 
 @dp.message_handler(lambda message: (message.text, message.text) not in RegionChoices.choices, state=RegData.region)
 async def get_region(message: types.Message, state: FSMContext):
@@ -116,7 +115,7 @@ async def get_region(message: types.Message, state: FSMContext):
 async def get_region(message: types.Message, state: FSMContext):
     try:
         await db_commands.update_user_data(region=message.text, telegram_id=message.from_user.id)
-        await message.reply(f'Sizni yangi viloyatingiz: <b>{message.text}</b>')
+        await message.reply(f'Sizni viloyatingiz: <b>{message.text}</b>')
         await asyncio.sleep(1)
     except Exception as err:
         logger.error(err)

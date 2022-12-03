@@ -3,8 +3,8 @@ from django_project.telegrambot.usersmanage.models import RegionChoices
 
 
 async def region_keyboard() -> InlineKeyboardMarkup:
-    markup = InlineKeyboardMarkup(row_width=5)
-    Toshkent = InlineKeyboardButton(text="", callback_data="Toshkent")
+    markup = InlineKeyboardMarkup(row_width=6)
+    Toshkent = InlineKeyboardButton(text="Toshkent", callback_data="Toshkent")
     Sirdaryo = InlineKeyboardButton(text="Sirdaryo", callback_data="Sirdaryo")
     Jizzax = InlineKeyboardButton(text="Jizzax", callback_data="Jizzax")
     Fargona = InlineKeyboardButton(text="Farg'ona", callback_data="Farg'ona")
@@ -17,7 +17,6 @@ async def region_keyboard() -> InlineKeyboardMarkup:
     Samarqand = InlineKeyboardButton(text="Samarqand", callback_data="Samarqand")
     Xorazm = InlineKeyboardButton(text="Xorazm", callback_data="Xorazm")
     Qoraqalpogiston = InlineKeyboardButton(text="Qoraqalpog'iston", callback_data="Qoraqalpog'iston")
-
     markup.row(Toshkent, Sirdaryo, Jizzax)
     markup.row(Fargona, Namangan, Andijon)
     markup.row(Navoiy, Buxoro, Samarqand)

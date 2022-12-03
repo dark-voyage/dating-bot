@@ -13,7 +13,7 @@ async def questionnaires_keyboard(target_id, monitoring=False) -> InlineKeyboard
                                                                                  target_id=target_id))
         dislike = InlineKeyboardButton(text='👎', callback_data=action_keyboard.new(action="dislike",
                                                                                     target_id=1))
-        go_back = InlineKeyboardButton(text=f'⏪️ Остановить',
+        go_back = InlineKeyboardButton(text=f"⏪️ To'xtatmoq",
                                        callback_data=action_keyboard.new(action="stopped",
                                                                          target_id=1))
         markup.row(like, dislike)
@@ -45,7 +45,7 @@ async def reciprocity_keyboard(user_for_like) -> InlineKeyboardMarkup:
 
 async def back_viewing_ques_keyboard() -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(row_width=1)
-    back = InlineKeyboardButton(text='Вернуться к просмотру анкет', callback_data="go_back_to_viewing_ques")
+    back = InlineKeyboardButton(text='Anketalarni kuzatishga qaytish', callback_data="go_back_to_viewing_ques")
     markup.row(back)
 
     return markup

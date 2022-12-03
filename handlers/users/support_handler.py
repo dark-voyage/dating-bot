@@ -17,20 +17,20 @@ async def ask_support_call(call: types.CallbackQuery):
     user_data = await get_data(telegram_id)
     user_status = user_data["status"]
     if user_status:
-        text = "Хотите связаться с тех поддержкой? Нажмите на кнопку ниже!"
+        text = "Texnik yordam bilan suhbat uchun pastadgi knopkani bosing"
         keyboard = await support_keyboard(messages="many")
         if not keyboard:
-            await call.message.edit_text("К сожалению, сейчас нет свободных операторов. Попробуйте позже.")
+            await call.message.edit_text("Uzr, hozirda operatorimiz bilan suhbat qura olmaysiz. Keyinroq harakat qiling!")
             return
         await call.message.edit_text(text, reply_markup=keyboard)
     else:
-        await call.message.edit_text("Вам необходимо зарегистрироваться, нажмите на кнопку ниже",
+        await call.message.edit_text("Siz registratsiya qilishingiz kerak, pastdagi knopkani bosing",
                                      reply_markup=await registration_keyboard())
 
 
 @dp.callback_query_handler(support_callback.filter(messages="many", as_user="yes"))
 async def send_to_support_call(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    await call.message.edit_text("Вы обратились в техподдержку. Ждем ответа от оператора!")
+    await call.message.edit_text("Operator javobini kuting!")
 
     user_id = int(callback_data.get("user_id"))
     if not await check_support_available(user_id):
@@ -39,7 +39,7 @@ async def send_to_support_call(call: types.CallbackQuery, state: FSMContext, cal
         support_id = user_id
 
     if not support_id:
-        await call.message.edit_text("К сожалению, сейчас нет свободных операторов. Попробуйте позже.")
+        await call.message.edit_text("Hozirchalik bo'sh operatorlar yo'q, keyinroq harakat qilib ko'ring")
         await state.reset_state()
         return
 
@@ -49,7 +49,7 @@ async def send_to_support_call(call: types.CallbackQuery, state: FSMContext, cal
     keyboard = await support_keyboard(messages="many", user_id=call.from_user.id)
 
     await bot.send_message(support_id,
-                           f"С вами хочет связаться пользователь {call.from_user.full_name}",
+                           f"Siz bilan bog'lnamoqchi {call.from_user.full_name}",
                            reply_markup=keyboard
                            )
 
@@ -60,7 +60,7 @@ async def answer_support_call(call: types.CallbackQuery, state: FSMContext, call
     user_state = dp.current_state(user=second_id, chat=second_id)
 
     if str(await user_state.get_state()) != "wait_in_support":
-        await call.message.edit_text("К сожалению, пользователь уже передумал.")
+        await call.message.edit_text("Foydalanuvchi yo'q dedi.")
         return
 
     await state.set_state("in_support")
@@ -71,14 +71,14 @@ async def answer_support_call(call: types.CallbackQuery, state: FSMContext, call
     keyboard = cancel_support(second_id)
     keyboard_second_user = cancel_support(call.from_user.id)
 
-    await call.message.edit_text("Вы на связи с пользователем!\n"
-                                 "Чтобы завершить общение нажмите на кнопку.",
+    await call.message.edit_text("Siz foydalanuvchi bilan aloqadasiz!\n"
+                                 "To'xtatish uchun knopkani bosing.",
                                  reply_markup=keyboard
                                  )
 
     await bot.send_message(second_id,
-                           "Техподдержка на связи! Можете писать сюда свое сообщение. \n"
-                           "Чтобы завершить общение нажмите на кнопку.",
+                           "Tex yordam siz bilan. \n"
+                           "To'xtatish uchun knopkani bosing.",
                            reply_markup=keyboard_second_user
                            )
 
@@ -89,7 +89,7 @@ async def not_supported(message: types.Message, state: FSMContext):
     second_id = data.get("second_id")
 
     keyboard = cancel_support(second_id)
-    await message.answer("Дождитесь ответа оператора или отмените сеанс", reply_markup=keyboard)
+    await message.answer("Operatordan javobni kuting", reply_markup=keyboard)
 
 
 @dp.callback_query_handler(cancel_support_callback.filter(), state=["in_support", "wait_in_support", None])
@@ -104,7 +104,7 @@ async def exit_support(call: types.CallbackQuery, state: FSMContext, callback_da
         second_id = data.get("second_id")
         if int(second_id) == call.from_user.id:
             await second_state.reset_state()
-            await bot.send_message(user_id, "Пользователь завершил сеанс техподдержки")
+            await bot.send_message(user_id, "Foydalanuvchi to'xtatdi seansni")
 
-    await call.message.edit_text("Вы завершили сеанс и были возвращены в главное меню", reply_markup=markup)
+    await call.message.edit_text("Siz seansni yakunladingiz", reply_markup=markup)
     await state.reset_state()

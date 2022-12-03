@@ -10,9 +10,8 @@ from loader import dp
 @dp.message_handler(state=None)
 async def bot_echo(message: types.Message):
     text = [
-        "Эхо без состояния.",
-        "Сообщение: ",
-        hcode(message.text)
+        f'Iltimos talab qilinayotgan narsani qiling',
+
     ]
 
     await message.answer(message.text)
@@ -22,9 +21,7 @@ async def bot_echo(message: types.Message):
 async def bot_echo_all(message: types.Message, state: FSMContext):
     state_name = await state.get_state()
     text = [
-        f'Эхо в состоянии {hcode(state_name)}',
-        'Содержание сообщения:',
-        hcode(message.text)
+        f'Iltimos talab qilinayotgan narsani qiling',
     ]
     await message.answer('\n'.join(text))
 

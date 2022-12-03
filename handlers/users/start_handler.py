@@ -32,12 +32,9 @@ async def register_user(message: types.Message):
     markup = await start_keyboard(status=user_db["status"])
 
     heart = random.choice(['💙', '💚', '💛', '🧡', '💜', '🖤', '❤', '🤍', '💖', '💝'])
-    await message.answer(text=f"Приветствую вас, {message.from_user.full_name}!!\n\n"
-                              f"{heart} <b> QueDateBot </b> - платформа для поиска новых знакомств.\n\n"
-                              f"🪧 Новости о проекте вы можете прочитать в нашем канале - "
-                              f"https://t.me/QueDateGroup \n\n"
-                              f"<b>🤝 Сотрудничество: </b>\n"
-                              f"Если у вас есть предложение о сотрудничестве, пишите агенту поддержки - "
+    await message.answer(text=f"Assalomu aleykum, {message.from_user.full_name}!!\n\n"
+                              f"{heart} <b> Sovchilik bot </b> - Turmush o'rtoq topish uchun joy.\n\n"
+                              f"Barcha savollar - "
                               f"@{support['username']}\n\n",
                          reply_markup=markup)
 
@@ -48,11 +45,8 @@ async def start_menu(call: CallbackQuery):
     support = await db_commands.select_user(telegram_id=load_config().tg_bot.support_ids[0])
     markup = await start_keyboard(user_db["status"])
     heart = random.choice(['💙', '💚', '💛', '🧡', '💜', '🖤', '❤', '🤍', '💖', '💝'])
-    await call.message.edit_text(text=f"Приветствую вас, {call.from_user.full_name}!!\n\n"
-                                      f"{heart} <b> QueDateBot </b> - платформа для поиска новых знакомств.\n\n"
-                                      f"🪧 Новости о проекте вы можете прочитать в нашем канале - "
-                                      f"https://t.me/QueDateGroup \n\n"
-                                      f"🤝 <b> Сотрудничество: </b>\n"
-                                      f"Если у вас есть предложение о сотрудничестве, пишите агенту поддержки - "
-                                      f"@{support['username']}\n\n",
+    await call.message.edit_text(text=f"Assalomu aleykum, {call.from_user.full_name}!!\n\n"
+                              f"{heart} <b> Sovchilik bot </b> - Turmush o'rtoq topish uchun joy.\n\n"
+                              f"Barcha savollar - "
+                              f"@{support['username']}\n\n",
                                  reply_markup=markup)
